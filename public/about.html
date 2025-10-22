@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אודות איתי פריזט ז"ל | סיפור חיים ומורשת</title>
+    <meta name="description" content="סיפור חייו, מורשתו ואישיותו של איתי פריזט ז"ל, חלל צה"ל שזכרו מונצח דרך פעילות העמותה.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <!-- Cookie Consent -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+    <!-- Mickidum Accessibility Toolbar -->
+    <script src="https://cdn.jsdelivr.net/gh/mickidum/acc_toolbar/acctoolbar/acctoolbar.min.js"></script>
+<!-- Zappy Analytics -->
+<script>
+(function() {
+  'use strict';
+  
+  // Configuration
+  var config = {
+    websiteId: '951b7004-1aae-46d5-9b67-b4d6c3c18d7c',
+    apiUrl: 'https://api.zappy5.com/api/analytics/track',
+    sessionDuration: 30 * 60 * 1000, // 30 minutes
+    trackPageViews: true,
+    trackClicks: true,
+    trackFormSubmissions: true
+  };
+  
+  // Generate or retrieve session ID
+  function getSessionId() {
+    var sessionKey = 'zappy_session_' + config.websiteId;
+    var session = null;
+    
+    try {
+      session = sessionStorage.getItem(sessionKey);
+      if (session) {
+        var sessionData = JSON.parse(session);
+        var now = Date.now();
+        
+        // Check if session is still valid
+        if (now - sessionData.timestamp < config.sessionDuration) {
+          // Update timestamp
+          sessionData.timestamp = now;
+          sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+          return sessionData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: SessionStorage not available');
+    }
+    
+    // Generate new session ID
+    var newSessionId = 'zs_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        id: newSessionId,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      // Continue without session storage
+    }
+    
+    return newSessionId;
+  }
+  
+  var sessionId = getSessionId();
+  
+  // Track an event
+  function trackEvent(eventType, data) {
+    data = data || {};
+    
+    var eventData = {
+      website_id: config.websiteId,
+      event_type: eventType,
+      page_path: window.location.pathname,
+      referrer: document.referrer || 'direct',
+      session_id: sessionId,
+      metadata: data
+    };
+    
+    // Use sendBeacon if available (better for page unload events)
+    if (navigator.sendBeacon) {
+      var blob = new Blob([JSON.stringify(eventData)], { type: 'application/json' });
+      navigator.sendBeacon(config.apiUrl, blob);
+    } else {
+      // Fallback to fetch
+      fetch(config.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(eventData),
+        keepalive: true
+      }).catch(function(error) {
+        console.warn('Zappy Analytics: Failed to track event', error);
+      });
+    }
+  }
+  
+  // Track page view
+  if (config.trackPageViews) {
+    trackEvent('pageview', {
+      title: document.title,
+      url: window.location.href
+    });
+  }
+  
+  // Track clicks on important elements
+  if (config.trackClicks) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      
+      // Track button clicks
+      if (target.tagName === 'BUTTON' || target.closest('button')) {
+        var button = target.tagName === 'BUTTON' ? target : target.closest('button');
+        trackEvent('click', {
+          element: 'button',
+          text: button.textContent.trim().substring(0, 100),
+          id: button.id || null,
+          class: button.className || null
+        });
+      }
+      
+      // Track link clicks
+      else if (target.tagName === 'A' || target.closest('a')) {
+        var link = target.tagName === 'A' ? target : target.closest('a');
+        trackEvent('click', {
+          element: 'link',
+          text: link.textContent.trim().substring(0, 100),
+          href: link.href,
+          external: link.hostname !== window.location.hostname
+        });
+      }
+    }, true);
+  }
+  
+  // Track form submissions
+  if (config.trackFormSubmissions) {
+    document.addEventListener('submit', function(e) {
+      var form = e.target;
+      
+      trackEvent('form_submit', {
+        form_id: form.id || null,
+        form_name: form.name || null,
+        form_action: form.action || null,
+        form_method: form.method || 'GET'
+      });
+    }, true);
+  }
+  
+  // Track time on page (send on page unload)
+  var pageLoadTime = Date.now();
+  
+  window.addEventListener('beforeunload', function() {
+    var timeOnPage = Math.floor((Date.now() - pageLoadTime) / 1000); // in seconds
+    
+    trackEvent('page_unload', {
+      time_on_page: timeOnPage,
+      page_path: window.location.pathname
+    });
+  });
+  
+  // Expose tracking function globally for custom events
+  window.zappyAnalytics = {
+    track: trackEvent,
+    getSessionId: function() { return sessionId; }
+  };
+  
+})();
+</script>
+<!-- End Zappy Analytics -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="/" class="logo-link">
+                    <img src="assets/logo.webp" alt="עמותת זיכרון למען החלל איתי פריזט ז"ל" class="logo" />
+                </a>
+            </div>
+            
+            <button class="mobile-toggle" id="mobileToggle" aria-label="תפריט">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/about">אודות איתי</a></li>
+                <li><a href="/activities">פעילות העמותה</a></li>
+                <li><a href="/gallery">גלריה</a></li>
+                <li><a href="/contact">צור קשר</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="page-hero">
+        <div class="hero-overlay"></div>
+        <img src="assets/business-hero.webp" alt="אודות איתי" class="hero-bg">
+        <div class="hero-content">
+            <h1>אודות איתי פריזט ז"ל</h1>
+            <p class="hero-subtitle">זיכרון חי ומורשת נצחית</p>
+        </div>
+    </section>
+
+    <section class="about-content">
+        <div class="container">
+            <div class="about-intro">
+                <h2>סיפור חיים של אהבה ונתינה</h2>
+                <p>איתי פריזט ז"ל היה בן יחיד למשפחתו, צעיר מלא חיים, אהבה ושאיפות. מגיל צעיר התאפיין באישיות חמה, בחיוך תמידי ובנכונות לעזור לכל אדם. חבריו וקרוביו זוכרים אותו כאדם שתמיד ראה את הטוב בזולת והאמין בכוחו של כל אחד לעשות שינוי.</p>
+            </div>
+
+            <div class="timeline-section">
+                <h2>מסע החיים</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>ילדות ונעורים</h3>
+                            <p>איתי גדל בעיר [שם העיר], שם למד בבית הספר היסודי ובתיכון. כבר בגיל צעיר הפגין מנהיגות טבעית והיה פעיל בתנועת נוער ובפעילויות קהילתיות.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>שירות צבאי</h3>
+                            <p>איתי התגייס לצה"ל ושירת ביחידה קרבית. הוא היה חייל מצטיין, מוערך על ידי מפקדיו וחבריו, והתנדב לכל משימה. רוחו הלוחמת ומסירותו למדינה היו דוגמה לכולם.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>נפילתו</h3>
+                            <p>איתי נפל בשירות המדינה בעת מילוי תפקידו. הוא הותיר אחריו משפחה אוהבת, חברים רבים וקהילה שלמה שזוכרת אותו באהבה ובכבוד.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="personality-section">
+                <h2>האישיות והערכים</h2>
+                <div class="personality-grid">
+                    <div class="personality-card">
+                        <h3>אהבת אדם</h3>
+                        <p>איתי אהב אנשים והאמין בטוב שבכל אחד. הוא תמיד מצא את הדרך לגרום לאחרים להרגיש מוערכים ואהובים.</p>
+                    </div>
+                    <div class="personality-card">
+                        <h3>מסירות ואחריות</h3>
+                        <p>כל משימה שקיבל על עצמו ביצע במלוא המסירות והאחריות, תוך דאגה לפרטים הקטנים ולרווחת הזולת.</p>
+                    </div>
+                    <div class="personality-card">
+                        <h3>חיוך ואופטימיות</h3>
+                        <p>גם ברגעים הקשים ביותר, איתי שמר על חיוך ועל גישה אופטימית שהדביקה את כל הסובבים אותו.</p>
+                    </div>
+                    <div class="personality-card">
+                        <h3>אהבת המולדת</h3>
+                        <p>איתי אהב את ארץ ישראל מעומק ליבו ומסר את חייו למען ביטחונה ועתידה.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="family-section">
+                <div class="family-content">
+                    <div class="family-text">
+                        <h2>המשפחה והעמותה</h2>
+                        <p>משפחתו וחבריו של איתי הקימו את העמותה כדי להנציח את זכרו ולהמשיך את דרכו. העמותה פועלת בתחומים שהיו קרובים ללבו של איתי: עזרה לזולת, תמיכה בחיילים ובמשפחות שכולות, ופעילות חברתית למען הקהילה.</p>
+                        <p>כל פעילות של העמותה היא המשך ישיר של הערכים והמעשים הטובים שאיתי ייצג בחייו. אנו שואפים לשמור על זכרו חי ופעיל, ולהשפיע לטובה על חיים רבים כפי שהוא עשה.</p>
+                    </div>
+                    <div class="family-image">
+                        <img src="assets/business-service-1.webp" alt="משפחה ועמותה">
+                    </div>
+                </div>
+            </div>
+
+            <div class="quote-section">
+                <blockquote>
+                    <p>"איתי לימד אותנו שהחיים הם מתנה יקרה, ושכל יום הוא הזדמנות לעשות טוב, לאהוב ולהשפיע. זכרו מחייב אותנו להמשיך בדרכו."</p>
+                    <cite>- משפחת פריזט</cite>
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+    
+    <!-- Legal Footer -->
+    <footer class="legal-footer">
+      <div class="container">
+        <div class="footer-main">
+          <div class="all-rights-reserved">
+            <p>© 2025 עמותת זיכרון למען החלל איתי פריזט ז"ל. כל הזכויות שמורות.</p>
+          </div>
+          <div class="footer-social"><a href="[facebook_url]" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+<a href="[instagram_url]" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+<a href="[whatsapp_url]" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a></div>
+          <div class="footer-legal">
+            <a href="privacy.html" target="_blank" rel="noopener" aria-label="מדיניות פרטיות">
+              מדיניות פרטיות
+            </a>
+            <span class="separator">|</span>
+            <a href="accessibility.html" target="_blank" rel="noopener" aria-label="נגישות">
+              נגישות
+            </a>
+            <span class="separator">|</span>
+            <a href="terms.html" target="_blank" rel="noopener" aria-label="תנאי שימוש">
+              תנאי שימוש
+            </a>
+          </div>
+        </div>
+        <div class="zappy-attribution">
+          <p>נוצר באמצעות Zappy</p>
+        </div>
+      </div>
+    </footer>
+
+    <a href="tel:[phone_number]" class="phone-float" aria-label="התקשר אלינו">
+        <i class="fas fa-phone"></i>
+    </a>
+    <a href="https://wa.me/[whatsapp_number]" target="_blank" class="whatsapp-float" aria-label="WhatsApp" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+    <div data-integration="accessibility:toolbar"></div>
+    <script src="script.js"></script>
+</body>
+</html>

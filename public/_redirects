@@ -1,0 +1,11 @@
+# Clean URL redirects for Render static hosting
+# These rewrite rules show clean URLs to users while serving .html files
+
+/about  /about.html  200
+/activities  /activities.html  200
+/gallery  /gallery.html  200
+/contact  /contact.html  200
+/  /index.html  200
+
+# 404 fallback
+/*  /index.html  404
