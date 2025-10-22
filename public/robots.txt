@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://-951b7004.zappy5.app/sitemap.xml
+Sitemap: https://itai-freist-memorial-associati.zappy5.app/sitemap.xml
